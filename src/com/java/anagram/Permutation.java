@@ -1,83 +1,66 @@
 package com.java.anagram;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.nio.file.Path;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.catalina.connector.Request;
-//import java.util.Dictionary;
-
-//Java program to print all permutations of a 
-//given string. 
 public class Permutation 
-{ 
-	//public static void main(String[] args) 
+{
+	//public static final ArrayList<String> dictionaryList = new ArrayList<String>();
+	
+	public static final Set<String> dictionaryList = new HashSet<String>();
+	
+	
 	public ArrayList<String> getAnagramList(HttpServletRequest request)
+	
 	{ 
 		String str = (String) request.getParameter("anagram");
 		int n = str.length(); 
 		ArrayList<String> finalList=new ArrayList<String>();
 		ArrayList<String> perm = new ArrayList<String>();
+		Set<String> matchedDict = new HashSet<String>();
 		Permutation permutation = new Permutation(); 
 		ArrayList<String> matchedArray=permutation.permute(str, 0, n-1,perm); 
-		//System.out.println("Printing matchedArray" + matchedArray);
+		InputStream is= this.getClass().getClassLoader().getResourceAsStream("com/java/anagram/dictionary.txt");
 		
-		// pass the path to the file as a parameter 
+		String line =null;
+		
+		BufferedReader br = new BufferedReader(new InputStreamReader(is)); 
 		try {
-			
-			//ServletContext sc = request.getSession().getServletContext();
-		      //URL url = sc.getResource("../WebContent/WEB-INF/docs/dictionary.txt");
-		      //System.out.println("path:"+request.getContextPath()+"/WEB-INF/docs/dictionary.txt");
-		     // System.out.println("URL:"+url);
-		   // Path resPath = new Path(url);
-		   
-		   //   File resFile = new File(url);
-		    //  FileReader resRdr = new FileReader(resFile);
-			BufferedReader br = new BufferedReader(new FileReader(request.getContextPath()+"/WebContent/WEB-INF/docs/dictionary.txt"));
-			
-			String line =null;
-			
-			try {
-				for (String perms : matchedArray) {
-					br=new BufferedReader(new FileReader(request.getContextPath()+"/WebContent/WEB-INF/docs/dictionary.txt"));
-					
-					while ((line=br.readLine()) != null){
-						if(line.length()==perms.length()&&perms.equals(line)){
-							//System.out.println("perms value from line:"+perms);
-					
-						finalList.add(line);
-						
-						}
+		//adding dictionary words in dictionarylist
+			while ((line=br.readLine()) != null){
+				dictionaryList.add(line);
+			}
+		
+		//creating a subset of dictionary as per matching inputted word's length.
+			for (String perms : matchedArray) {
+					for(String dict:dictionaryList) {
+						if(perms.length() == dict.length()) { 
+							matchedDict.add(dict);
 						}
 					}
-					
+				}
 				
-				System.out.println("Final list is "+finalList);
-				
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				try {
-					if(br!=null) {
-					br.close();}
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
+		//creating the final matching Anagrams list
+			for (String perms : matchedArray) {
+				for(String mdict:matchedDict) {
+					if(perms.equals(mdict)) {
+						finalList.add(mdict);
+					}
 				}
 			}
-		} catch (FileNotFoundException e) {
+				
+		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} 
+		}
+		matchedDict.clear();
 		return finalList;
 	}
 
@@ -89,9 +72,7 @@ public class Permutation
 	*/
 	private ArrayList<String> permute(String str, int l, int r,ArrayList<String> inputarr ) 
 	{ 
-		//ArrayList<String> arr=new ArrayList<String>();
 		if (l == r) {
-			//System.out.println(str); 
 			inputarr.add(str);
 		}
 		else
